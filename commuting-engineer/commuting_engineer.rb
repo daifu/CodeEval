@@ -32,13 +32,13 @@ class CommutingEngineer
     path    = node.path
     last_x  = path[-1]
     choices = total.select {|t| !path.include?(t)}
-    nodes   = []
+    nodes   = create_sorted_ary
     choices.each do |c|
       score = node.cur_score+node.table[last_x][c]
       filtered_table = mark_x_row_y_col_to_max(node.table, last_x, c)
+      #filtered_table[c][last_x] = MAX_VALUE #avoid subcircle
       nodes << Node.new(path+[c], min_score(filtered_table)+score, filtered_table, score)
     end
-    debugger
     nodes
   end
 
@@ -69,32 +69,36 @@ class CommutingEngineer
   end
 
   def min_score(table)
-    min_ary = []
-    table.each do |row|
-      min_ary << (row.min != MAX_VALUE ? row.min : 0)
+    total   = table.reduce(0.0) {|sum, row| sum += row.min != MAX_VALUE ? row.min : 0}
+    ele_max = table.map {|row| row.min != MAX_VALUE ? row.min : 0}.max
+    total - ele_max
+  end
+
+  def create_sorted_ary
+    return SortedArray.new do |x, y|
+      is_x_greater = x.min <=> y.min
+      if is_x_greater == 0 #they are equal
+        x.cur_score <=> y.cur_score
+      else
+        is_x_greater
+      end
     end
-    max_ele = min_ary.max
-    min_ary.reduce(0.0) {|sum, ele| sum += ele} - max_ele
   end
 
   def min_route(locations)
-    sorted_ary = SortedArray.new do |x, y|
-      x.min <=> y.min
-    end
     table = build_distance_table(locations)
     min  = min_score(table)
     node = Node.new([0], min, table, 0)
     total = locations.size.times.to_a
-    sorted_ary << node
+    nodes = create_sorted_ary
+    nodes << node
     return loop do
-      node = sorted_ary.slice!(0)
+      node = nodes.slice!(0)
       nexts = adjacent_nodes(node, total)
-      break node if nexts.size == 0
+      break node.path if nexts.size == 0
       nexts.each do |n|
-        sorted_ary << n
+        nodes << n
       end
-      debugger
-      break node if (sorted_ary.size < 0)
     end
   end
 

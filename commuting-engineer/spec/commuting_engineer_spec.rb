@@ -35,10 +35,24 @@ describe CommutingEngineer do
     context "with correct input" do
       before :each do
         @max = CommutingEngineer::MAX_VALUE
-        @table = [[@max, 2**(1/2.0), 1, 5**(1/2.0)],
-                 [2**(1/2.0), @max, 1, 1],
-                 [1, 1, @max, 2**(1/2.0)],
-                 [5**(1/2.0), 1, 2**(1/2.0), @max]]
+        sq_2         = 2**(1/2.0)
+        sq_5         = 5**(1/2.0)
+        @table = [[@max, sq_2,  1,    sq_5],
+                 [sq_2,  @max,  1,    1],
+                 [1,     1,     @max, sq_2],
+                 [sq_5,  1,     sq_2, @max]]
+        node  = CommutingEngineer::Node
+        @node1       =  node.new([0], 3.0, @table, 0)
+        @node1_nexts = [node.new([0,2], 3.0,      @ce.mark_x_row_y_col_to_max(@table, 0,2), 1),
+                        node.new([0,1], sq_2+2,   @ce.mark_x_row_y_col_to_max(@table, 0,1), sq_2),
+                        node.new([0,3], sq_5+2,   @ce.mark_x_row_y_col_to_max(@table, 0,3), sq_5)]
+        @node2       = @node1_nexts.first
+        @node2_nexts = [node.new([0,2,1], 3.0,    @ce.mark_x_row_y_col_to_max(@node2.table, 2,1), 2),
+                        node.new([0,2,3], 2+sq_2, @ce.mark_x_row_y_col_to_max(@node2.table, 2,3), 1+sq_2)]
+        @node3       = @node2_nexts.first
+        @node3_nexts = [node.new([0,2,1,3], 3.0,  @ce.mark_x_row_y_col_to_max(@node3.table, 1,3), 3)]
+        @node4       = @node3_nexts.first
+        @node4_nexts = []
       end
       it "should return minmum distance" do
         @ce.rec_min_distnace_wrapper(@simple).should == 3
@@ -62,14 +76,19 @@ describe CommutingEngineer do
                                                              [@max, 1, 2**(1/2.0), @max]]
       end
 
+      it "should get the correct adjacent_nodes" do
+        table = @ce.mark_x_row_y_col_to_max(@table, 0, 1)
+        @ce.adjacent_nodes(@node1, [0,1,2,3]).should == @node1_nexts
+        @ce.adjacent_nodes(@node2, [0,1,2,3]).should == @node2_nexts
+        @ce.adjacent_nodes(@node3, [0,1,2,3]).should == @node3_nexts
+        @ce.adjacent_nodes(@node4, [0,1,2,3]).should == @node4_nexts
+      end
+
       it "should return the min route" do
-        ret = @ce.min_route(@medium)
-        debugger
-        puts "hello world"
-        #@ce.min_route(@simple).should == [0,2,1,3]
-        #@ce.min_route(@medium).should == [0, 2, 4, 5, 3, 1]
+        @ce.min_route(@simple).should == [0,2,1,3]
+        @ce.min_route(@medium).should == [0,5,1,4,2,3]
         #@ce.min_route(@locations).should == [1,3,2,5,6,4]
-        #@ce.min_route(@locations).should == [0,2,1,4,5,3]
+        @ce.min_route(@locations).should == [0,2,1,4,5,3]
       end
     end
 
