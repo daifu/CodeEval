@@ -8,10 +8,6 @@ class CommutingEngineer
     @file = file
   end
 
-  def distance(loc1, loc2)
-    ((loc1[0] - loc2[0])**2 + (loc1[1] - loc2[1])**2)**(1/2.0)
-  end
-
   def rec_min_distance(start, locations)
     if locations.size == 0
       return 0
@@ -28,6 +24,29 @@ class CommutingEngineer
     rec_min_distance(locations[0], locations[1..-1])
   end
 
+  def haversine(lat1, long1, lat2, long2)
+    radius_of_earth = 6378.14
+    rlat1, rlong1, rlat2, rlong2 = [lat1, long1, lat2, long2].map { |d| as_radians(d)}
+    dlon = rlong1 - rlong2
+    dlat = rlat1 - rlat2
+
+    a = power(Math.sin(dlat/2), 2) + Math.cos(rlat1) * Math.cos(rlat2) * power(Math.sin(dlon/2), 2)
+    great_circle_distance = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    radius_of_earth * great_circle_distance
+  end
+
+  def as_radians(degrees)
+    degrees * Math::PI/180
+  end
+
+  def power(num, pow)
+    num ** pow
+  end
+
+  def distance(loc1, loc2)
+    haversine(loc1[0], loc1[1], loc2[0], loc2[1])
+  end
+
   def adjacent_nodes(node, total)
     path    = node.path
     last_x  = path[-1]
@@ -36,7 +55,6 @@ class CommutingEngineer
     choices.each do |c|
       score = node.cur_score+node.table[last_x][c]
       filtered_table = mark_x_row_y_col_to_max(node.table, last_x, c)
-      #filtered_table[c][last_x] = MAX_VALUE #avoid subcircle
       nodes << Node.new(path+[c], min_score(filtered_table)+score, filtered_table, score)
     end
     nodes
@@ -104,7 +122,7 @@ class CommutingEngineer
 
   def solve
     locations = prepare(@file)
-    min_route(locations)
+    min_route(locations).map {|i| i+1}
   end
 
   def prepare(file_in)
