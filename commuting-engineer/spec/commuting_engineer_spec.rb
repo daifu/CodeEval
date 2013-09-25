@@ -60,11 +60,6 @@ describe CommutingEngineer do
         @node4_nexts = []
       end
 
-      it "should return minmum distance" do
-        @ce.rec_min_distnace_wrapper(@simple).should == 333.94167452354156
-        (@ce.rec_min_distnace_wrapper(@medium) - 12.2360679775) < 0.001
-      end
-
       it "should build a correct table" do
         @ce.build_distance_table(@simple).should == @table
       end

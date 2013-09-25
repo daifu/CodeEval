@@ -8,22 +8,6 @@ class CommutingEngineer
     @file = file
   end
 
-  def rec_min_distance(start, locations)
-    if locations.size == 0
-      return 0
-    else
-      distances = []
-      locations.each_with_index do |loc, i|
-        distances << (rec_min_distance(loc, locations[0...i]+locations.drop(i+1)) + distance(start, loc))
-      end
-      return distances.min
-    end
-  end
-
-  def rec_min_distnace_wrapper(locations)
-    rec_min_distance(locations[0], locations[1..-1])
-  end
-
   def haversine(lat1, long1, lat2, long2)
     radius_of_earth = 6378.14
     rlat1, rlong1, rlat2, rlong2 = [lat1, long1, lat2, long2].map { |d| as_radians(d)}
