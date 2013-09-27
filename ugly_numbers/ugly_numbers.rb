@@ -1,29 +1,27 @@
 class UglyNumbers
 
+  Node = Struct.new(:num, :idx, :cur_str)
+
   def initialize(file)
     @file = file
   end
 
-  def rec_get_all_numbers_helper(node, rest, max_size)
-    return if @ret.size == max_size
-    if rest.size == 0
-      @ret << node unless @ret.include?(node)
-      return
-    end
-    rest.each do |r|
+  def get_all_numbers(str)
+    return [str] if str.size == 1
+    queue = []
+    ret   = []
+    queue.push(Node.new(str[0], 0, str[0]))
+    while(queue.size > 0) do
+      node = queue.slice!(0)
       ['', '-', '+'].each do |op|
-        rec_get_all_numbers_helper(node+op+r, rest[1..-1], max_size)
+        if node.idx+2 == str.size
+          ret << node.cur_str+op+str[node.idx+1]
+        else
+          queue << Node.new(str[node.idx+1], node.idx+1, node.cur_str+op+str[node.idx+1])
+        end
       end
     end
-    return
-  end
-
-  def rec_get_all_numbers(str)
-    @ret  = []
-    str   = str.split('')
-    first = str.slice!(0)
-    rec_get_all_numbers_helper(first, str, 3**(str.size))
-    @ret
+    ret
   end
 
   def evaluate(str)
@@ -31,32 +29,22 @@ class UglyNumbers
     parts.reduce(0) {|sum, n| sum+=n.to_i}
   end
 
-  def evaluate_to_hash(possible_res)
-    hash = {}
-    possible_res.each do |str|
-      res = evaluate(str)
-      hash[res.to_s] ||= 0
-      hash[res.to_s] += 1
-    end
-    hash
-  end
-
   def is_ugly(num)
-    return num == 0 || num % 2 == 0 || num % 3 == 0 || num % 5 == 0 || num % 7 == 0
+    return num % 2 == 0 || num % 3 == 0 || num % 5 == 0 || num % 7 == 0
   end
 
-  def sum_ugly_numbers(hash)
+  def sum_ugly_numbers(possible_res)
     sum = 0
-    hash.each do |key, value|
-      sum += value if is_ugly(key.to_i)
+    possible_res.each do |res|
+      value = evaluate(res)
+      sum += 1 if is_ugly(value)
     end
     sum
   end
 
   def num_of_ugly_numbers(str)
-    possible_res  = rec_get_all_numbers(str)
-    evaluated_res = evaluate_to_hash(possible_res)
-    sum_ugly_numbers(evaluated_res)
+    possible_res = get_all_numbers(str)
+    sum_ugly_numbers(possible_res)
   end
 
   def prepare(file_in)
