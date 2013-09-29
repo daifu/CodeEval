@@ -52,33 +52,12 @@ class DaVyncy
   end
 
   #
-  # get the potential max score by just all all
-  # the max of each row
-  #
-  def expected_max_score(table)
-    table.reduce(0) {|sum, row| sum += row.max}
-  end
-
-  #
   # Created sorted array object from sorted_array.rb
   #
   def create_sorted_ary
     return SortedArray.new do |x, y|
       y.cur_score <=> x.cur_score
     end
-  end
-
-  #
-  # Mark row x and col y to max means we cannot use it.
-  #
-  def mark_x_row_y_col_to_min(table, x, y)
-    new_table = Marshal.load(Marshal.dump(table))
-    new_table[x] = [MIN_VALUE] * new_table[x].size
-
-    new_table.size.times.each do |i|
-      new_table[i][y] = MIN_VALUE
-    end
-    new_table
   end
 
   #

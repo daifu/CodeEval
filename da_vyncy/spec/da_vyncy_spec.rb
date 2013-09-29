@@ -51,16 +51,6 @@ describe DaVyncy do
     end
   end
 
-  describe 'expected_max_score' do
-    it "should return the expected max score" do
-      table = [[@min, 5,    @min, 0],
-               [@min, @min, @min, @min],
-               [0,    3,    @min, 2],
-               [5,    0,    @min, @min]]
-      @dv.expected_max_score(table).should == 13
-    end
-  end
-
   describe "build_queue" do
     it "should create a queue with all the nodes from the table and sorted in descending order" do
       table = [[@min, 5,    0,    0],
