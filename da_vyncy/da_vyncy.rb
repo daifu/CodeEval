@@ -3,7 +3,7 @@ require_relative 'sorted_array'
 class DaVyncy
 
   MIN_VALUE = 0
-  Node = Struct.new(:max, :path, :cur_score, :table, :sentence)
+  Node = Struct.new(:path, :cur_score, :sentence)
 
   def initialize(file='in')
     @file = file
@@ -21,7 +21,7 @@ class DaVyncy
         break if front[i+j] != back[j] || i+j > front.size
         cur_max += 1
       end
-      abs_max = [cur_max, abs_max].max if i+cur_max == front.size
+      abs_max = [cur_max, abs_max].max if (i+cur_max == front.size) || (cur_max == back.size)
       cur_max = 0
     end
     abs_max
@@ -64,12 +64,7 @@ class DaVyncy
   #
   def create_sorted_ary
     return SortedArray.new do |x, y|
-      is_y_greater = y.max <=> x.max
-      if is_y_greater == 0 #they are equal
-        y.cur_score <=> x.cur_score
-      else
-        is_y_greater
-      end
+      y.cur_score <=> x.cur_score
     end
   end
 
@@ -94,22 +89,28 @@ class DaVyncy
   end
 
   #
+  # merge 2 strings by removing common chars
+  #
+  def merge(front, back)
+    length = overlay_length(front, back)
+    front+back[length..-1]
+  end
+
+  #
   # Get all the adjacents nodes by one node
   #
-  def adjacent_nodes(node, strings)
+  def adjacent_nodes(node, strings, table)
     path    = node.path
     last_x  = path[-1]
     choices = all_choices(strings.size).select {|t| !path.include?(t)}
-    nodes   = []
+    nodes   = create_sorted_ary
     choices.each do |c|
-      path           = node.path+[c]
-      score          = node.cur_score+node.table[last_x][c]
-      filtered_table = mark_x_row_y_col_to_min(node.table, last_x, c)
-      max            = expected_max_score(filtered_table)+score
-      cur_sentence   = node.sentence+strings[c][node.table[last_x][c]..-1]
-      nodes << Node.new(max, path, score, filtered_table, cur_sentence)
+      score        = table[last_x][c]
+      path         = node.path+[c]
+      cur_sentence = merge(node.sentence, strings[c])
+      nodes << Node.new(path, score, cur_sentence)
     end
-    nodes
+    nodes.first(1)
   end
 
   #
@@ -122,12 +123,10 @@ class DaVyncy
       row.each_with_index do |col, col_index|
         next if row_index == col_index
         next if col == 0
-        path           = [row_index, col_index]
-        cur_score      = col
-        filtered_table = mark_x_row_y_col_to_min(table, row_index, col_index)
-        max            = expected_max_score(filtered_table)+col
-        cur_sentence   = strings[row_index]+strings[col_index][table[row_index][col_index]..-1]
-        queue << Node.new(max, path, cur_score, filtered_table, cur_sentence)
+        path         = [row_index, col_index]
+        cur_score    = col
+        cur_sentence = merge(strings[row_index], strings[col_index])
+        queue << Node.new(path, cur_score, cur_sentence)
       end
     end
     queue
@@ -138,10 +137,10 @@ class DaVyncy
   # if a node with the max score and current score (score is
   # calculated based on how many match)
   #
-  def get_sentence(queue, strings)
+  def get_sentence(queue, strings, table)
     return loop do
       node  = queue.slice!(0)
-      nexts = adjacent_nodes(node, strings)
+      nexts = adjacent_nodes(node, strings, table)
       break node.sentence if nexts.size == 0 && node.path.size == strings.size
       nexts.each do |n|
         queue << n
@@ -160,7 +159,7 @@ class DaVyncy
     strings = parse(str)
     table   = build_table(strings)
     queue   = build_queue(table, strings)
-    get_sentence(queue, strings)
+    get_sentence(queue, strings, table)
   end
 
   def solve

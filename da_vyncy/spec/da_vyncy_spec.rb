@@ -16,13 +16,19 @@ describe DaVyncy do
       @dv.sentence(str).should == 'O draconian devil! Oh lame saint!'
     end
 
+    it "should pass the medium test" do
+      str = "ABCDEF;DEFG;XYZABC;BCDE;XCDEZ"
+      @dv.sentence(str).should == 'XYZABCDEFGXCDEZ'
+    end
+
     it "should pass the hardest tests" do
-      #str = @test2
-      #res = 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.'
+      str = @test2
+      res = 'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.'
       #str = 'm quaerat voluptatem.;pora incidunt ut labore et d;, consectetur, adipisci velit;olore magnam aliqua;idunt ut labore et dolore magn;uptatem.;i dolorem ipsum qu;iquam quaerat vol;psum quia dolor sit amet, consectetur, a;ia dolor sit amet, conse'
-      #@dv.sentence(str).should == ''
+      @dv.sentence(str).should == res
     end
   end
+
 
   describe "parse" do
     it "should split a long string into parts by ;" do
@@ -37,6 +43,11 @@ describe DaVyncy do
                [0,    0,    @min, 2],
                [0,    0,    0,    @min]]
       @dv.build_table(['O draconia', 'conian devil! Oh la', 'h lame sa', 'saint!']).should == table
+    end
+
+    it "should works for back string insdie the front string" do
+      table = [[0,3,0,4,0],[0,0,0,0,0],[3,0,0,2,0],[0,2,0,0,0],[0,0,0,0,0]]
+      @dv.build_table("ABCDEF;DEFG;XYZABC;BCDE;XCDEZ".split(';')).should == table
     end
   end
 
@@ -65,10 +76,10 @@ describe DaVyncy do
   describe "adjacent_nodes" do
     it "should get all the possible adjacents node form the parent" do
       node  = DaVyncy::Node
-      test  = node.new(11, [0,1], 5, [[0, 0, 0, 0], [0, 0, 4, 0], [0, 0, 0, 2], [0, 0, 0, 0]], "O draconian devil! Oh la")
-      nexts = @dv.adjacent_nodes(test, ['O draconia', 'conian devil! Oh la', 'h lame sa', 'saint!'])
-      nexts.size.should == 2
-      nexts[0].path.size.should == nexts[1].path.size
+      table = [[0, 0, 0, 0], [0, 0, 4, 0], [0, 0, 0, 2], [0, 0, 0, 0]]
+      test  = node.new([0,1], 5,"O draconian devil! Oh la")
+      nexts = @dv.adjacent_nodes(test, ['O draconia', 'conian devil! Oh la', 'h lame sa', 'saint!'], table)
+      nexts.size.should == 1
     end
   end
 
