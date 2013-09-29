@@ -35,7 +35,7 @@ class CommutingEngineer
     path    = node.path
     last_x  = path[-1]
     choices = total.select {|t| !path.include?(t)}
-    nodes   = create_sorted_ary
+    nodes   = []
     choices.each do |c|
       score = node.cur_score+node.table[last_x][c]
       filtered_table = mark_x_row_y_col_to_max(node.table, last_x, c)
