@@ -99,14 +99,17 @@ class DaVyncy
   def build_queue(table, strings)
     queue = create_sorted_ary
     table.each_with_index do |row, row_index|
+      row_queue = create_sorted_ary
       row.each_with_index do |col, col_index|
         next if row_index == col_index
         next if col == 0
         path         = [row_index, col_index]
         cur_score    = col
         cur_sentence = merge(strings[row_index], strings[col_index])
-        queue << Node.new(path, cur_score, cur_sentence)
+        row_queue << Node.new(path, cur_score, cur_sentence)
       end
+      queue << row_queue.first if row_queue.size > 0
+      row_queue.clear
     end
     queue
   end
