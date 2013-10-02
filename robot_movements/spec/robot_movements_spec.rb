@@ -6,7 +6,7 @@ describe RobotMovements do
   describe 'num_of_ways' do
     it "should get the correct number of ways" do
       rb = RobotMovements.new
-      rb.num_of_ways.should == 10
+      rb.num_of_ways.should == 184
     end
   end
 
