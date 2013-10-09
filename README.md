@@ -2,7 +2,7 @@
 Just for programming workout
 
 
-###Difficult levels
+####Difficulty levels
 
 Hard
 
