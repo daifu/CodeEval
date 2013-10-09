@@ -5,10 +5,10 @@ Just for programming workout
 ###Difficult levels
 
 ####Hard
-commuting-engineer
-da_vyncy
-robot_movements
-ugly_numbers
+1. commuting-engineer
+2. da_vyncy
+3. robot_movements
+4. ugly_numbers
 
 ####Medium
-prime_numbers
+1. prime_numbers
