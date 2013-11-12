@@ -62,6 +62,17 @@ describe Solver do
       @s.maze.maze = maze
       @s.solve.should == -1
     end
+
+    it "should get correct res with prisms5" do
+      # @---v
+      # >--vv
+      # ->---
+      # -^-<-
+      # ^---<
+      maze = get_maze(['@---v','>--vv','->---', '-^-<-', '^---<'])
+      @s.maze.maze = maze
+      @s.solve.should == 27
+    end
   end
 
 end

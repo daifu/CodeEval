@@ -21,16 +21,17 @@ module Direction
     self.send(@cur_dir)
   end
 
-  def has_all_dirs?
-    # Note: there are only 4 different directions
-    @seen_dirs.size == 4
+  def store_seen_dir(dir)
+    raise DirectionRepeatedError.new("Direction repeated") if (repeated_dir(dir))
+    @seen_dirs[dir_key(dir)] = 1
   end
 
-  # Note: use this to stop the loop because the laser cannot
-  #       repeat the direction except repeating east direction, or it will
-  #       create infinite loop
-  def repeat_dir_except_go_east(next_dir)
-    has_all_dirs? && next_dir != :go_east && @cur_dir != next_dir
+  def repeated_dir(dir)
+    !@seen_dirs[dir_key(dir)].nil?
+  end
+
+  def dir_key(dir)
+    "#{self.row},#{self.col},#{dir}"
   end
 
   def go_north
@@ -54,13 +55,10 @@ module Direction
   #
   def go dir
     unless direction[dir].nil?
-      @seen_dirs = [] unless @seen_dirs
+      @seen_dirs = {} unless @seen_dirs
 
-      if repeat_dir_except_go_east(direction[dir])
-        raise DirectionRepeatedError.new("Direction repeated") if has_all_dirs?
-      end
+      store_seen_dir(dir)
       @cur_dir = direction[dir]
-      @seen_dirs << @cur_dir unless @seen_dirs.include?(@cur_dir)
       self.send(direction[dir])
     else
       raise DirectionNotFoundError.new("Direction not found")
